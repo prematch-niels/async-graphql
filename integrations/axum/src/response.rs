@@ -4,6 +4,7 @@ use axum::{
     http::{HeaderValue, Response},
     response::IntoResponse,
 };
+use axum::body::Full;
 
 /// Responder for a GraphQL response.
 ///
@@ -26,8 +27,8 @@ impl From<async_graphql::BatchResponse> for GraphQLResponse {
 impl IntoResponse for GraphQLResponse {
     fn into_response(self) -> Response<BoxBody> {
         // let body: Body = serde_json::to_string(&self.0).unwrap().into();
-        let body = bincode::serialize(&self.0).unwrap();
-        let mut resp = Response::new(boxed(body));
+        let body = Full::new(bincode::serialize(&self.0).unwrap());
+        let mut resp = Response::new(body);
         resp.headers_mut().insert(
             http::header::CONTENT_TYPE,
             HeaderValue::from_static("application/octet-stream"),
