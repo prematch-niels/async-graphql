@@ -25,11 +25,12 @@ impl From<async_graphql::BatchResponse> for GraphQLResponse {
 
 impl IntoResponse for GraphQLResponse {
     fn into_response(self) -> Response<BoxBody> {
-        let body: Body = serde_json::to_string(&self.0).unwrap().into();
+        // let body: Body = serde_json::to_string(&self.0).unwrap().into();
+        let body = bincode::serialize(&self.0).unwrap();
         let mut resp = Response::new(boxed(body));
         resp.headers_mut().insert(
             http::header::CONTENT_TYPE,
-            HeaderValue::from_static("application/json"),
+            HeaderValue::from_static("application/octet-stream"),
         );
         if self.0.is_ok() {
             if let Some(cache_control) = self.0.cache_control().value() {
